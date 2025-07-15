@@ -73,26 +73,21 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
                 setIsLoadingDates(true);
                 const presenceRef = ref(database, "lecturer_presence");
                 const snapshot = await get(presenceRef);
-                console.log("Firebase snapshot for dates:", snapshot.val());
                 if (snapshot.exists()) {
                     const datesData = Object.keys(snapshot.val());
-                    console.log("Raw dates from Firebase:", datesData);
                     // Validate date format (YYYY-MM-DD)
                     const validDates = datesData.filter((date) =>
                         /^\d{4}-\d{2}-\d{2}$/.test(date)
                     );
                     // Sort dates in descending order (latest first)
                     validDates.sort((a, b) => b.localeCompare(a));
-                    console.log("Sorted valid dates:", validDates);
                     setDates(validDates);
                     if (validDates.length > 0) {
                         setSelectedDate(validDates[0]);
                     } else {
-                        console.log("No valid dates found after filtering.");
                         toast.warning("Tidak ada tanggal valid di database.");
                     }
                 } else {
-                    console.log("No data found in lecturer_presence.");
                     toast.warning("Database lecturer_presence kosong.");
                     setDates([]);
                 }
@@ -111,7 +106,6 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
 
     useEffect(() => {
         if (!selectedDate) {
-            console.log("No selectedDate, skipping attendance data fetch.");
             return;
         }
 
@@ -120,7 +114,6 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
                 setIsLoadingData(true);
                 const attendanceRef = ref(database, `lecturer_presence/${selectedDate}`);
                 const snapshot = await get(attendanceRef);
-                console.log(`Firebase snapshot for ${selectedDate}:`, snapshot.val());
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     const attendanceArray: LecturePresence[] = Object.keys(data)
@@ -142,7 +135,6 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
                             }
                             return isValid;
                         });
-                    console.log("Filtered attendance data:", attendanceArray);
                     setAttendanceData(attendanceArray);
 
                     const updatedSummary: Summary = {
@@ -162,9 +154,7 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
                         ).length,
                     };
                     setSummary(updatedSummary);
-                    console.log("Summary:", updatedSummary);
                 } else {
-                    console.log(`No data found for date: ${selectedDate}`);
                     setAttendanceData([]);
                     setSummary({
                         total: 0,
@@ -192,7 +182,6 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
 
     const handleDeleteRecord = async () => {
         if (!selectedRecord || !selectedDate) {
-            console.log("No selectedRecord or selectedDate for deletion.");
             return;
         }
 
@@ -217,7 +206,6 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
                 const lecturerData = snapshot.val();
                 const rfidUid = lecturerData.rfidUid;
 
-                console.log("RFID UID for lecturer:", rfidUid);
                 
 
                 if (rfidUid) {
@@ -226,7 +214,6 @@ export const useAttendancePage = (): UseAttendancePageReturn => {
                         `presence/${selectedDate}/${rfidUid}`
                     );
 
-                    console.log("sudah mengambil rfidUid:", rfidUid);
 
                     await remove(presenceRef);
                 }

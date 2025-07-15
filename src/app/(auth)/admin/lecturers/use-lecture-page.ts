@@ -95,12 +95,10 @@ export function UseLecturePage() {
     setIsDeleting(true);
 
     try {
-      console.log("Deleting:", selectedLecturer.id);
 
       const lecturerRef = ref(database, `lecturers/${selectedLecturer.id}`);
       await remove(lecturerRef);
 
-      console.log("Deleted from Firebase");
 
       setLecturers((prev) => prev.filter((l) => l.id !== selectedLecturer.id));
 

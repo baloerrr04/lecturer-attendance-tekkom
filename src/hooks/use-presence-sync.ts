@@ -25,7 +25,6 @@ export function UsePresenceSync() {
     
     const todayDate = getFormattedDate();
     
-    console.log('🔄 Memulai sinkronisasi kehadiran untuk tanggal:', todayDate);
     
     // Listen untuk perubahan di data dosen
     const dbLecturersRef = ref(database, 'lecturers');
@@ -37,7 +36,6 @@ export function UsePresenceSync() {
       }
       
       lecturersRef.current = snapshot.val();
-      console.log('📋 Data dosen diperbarui');
     };
     
     const lecturersUnsubscribe = onValue(dbLecturersRef, handleLecturersChange);
@@ -56,7 +54,6 @@ export function UsePresenceSync() {
         presenceRef.current = snapshot.val();
       }
       
-      console.log('🔄 Perubahan terdeteksi pada data kehadiran');
       
       try {
         // Waktu sekarang untuk update
@@ -71,7 +68,6 @@ export function UsePresenceSync() {
             if (lecturer.rfidUid === uid) {
               // Dosen ditemukan, update statusnya jika belum "hadir"
               if (lecturer.status !== 'hadir') {
-                console.log(`✏️ Memperbarui status dosen ${lecturer.name} menjadi "hadir"`);
                 
                 // Update status di lecturers
                 const lecturerRef = ref(database, `lecturers/${lecturerId}`);
@@ -85,7 +81,6 @@ export function UsePresenceSync() {
                 const presenceHistorySnapshot = await get(presenceHistoryRef);
                 
                 if (!presenceHistorySnapshot.exists()) {
-                  console.log(`📝 Mencatat riwayat kehadiran untuk ${lecturer.name}`);
                   
                   await update(presenceHistoryRef, {
                     name: lecturer.name,
@@ -104,7 +99,6 @@ export function UsePresenceSync() {
         for (const uid in previousPresence) {
           // Jika UID tidak ada di presence saat ini, berarti sudah dihapus
           if (!presenceRef.current[uid]) {
-            console.log(`🔍 UID ${uid} telah dihapus dari data kehadiran`);
             
             // Cari dosen dengan RFID UID yang cocok
             for (const lecturerId in lecturersRef.current) {
@@ -112,7 +106,6 @@ export function UsePresenceSync() {
               
               if (lecturer.rfidUid === uid) {
                 // Dosen ditemukan, update statusnya menjadi "tidak hadir"
-                console.log(`✏️ Memperbarui status dosen ${lecturer.name} menjadi "tidak hadir"`);
                 
                 // Update status di lecturers
                 const lecturerRef = ref(database, `lecturers/${lecturerId}`);
@@ -126,7 +119,6 @@ export function UsePresenceSync() {
                 const presenceHistorySnapshot = await get(presenceHistoryRef);
                 
                 if (presenceHistorySnapshot.exists()) {
-                  console.log(`🗑️ Menghapus riwayat kehadiran untuk ${lecturer.name}`);
                   await remove(presenceHistoryRef);
                 }
                 
@@ -147,7 +139,6 @@ export function UsePresenceSync() {
     return () => {
       off(dbLecturersRef);
       off(dbPresenceRef);
-      console.log('🛑 Menghentikan sinkronisasi kehadiran');
     };
   }, []);
 }

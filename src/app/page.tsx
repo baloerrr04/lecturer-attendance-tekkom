@@ -52,10 +52,7 @@ export default function HomePage() {
 
   // Determine if a lecturer is present (either checked in or stayed)
   const isLecturerPresent = (lecturer: Lecturer) => {
-    return (
-      lecturer.status === "masuk" ||
-      lecturer.status === "pulang" 
-    );
+    return lecturer.status === "masuk" || lecturer.status === "pulang";
   };
 
   // Filter lecturers based on teaching schedule and presence
@@ -125,10 +122,8 @@ export default function HomePage() {
         teachingDays: data[key].teachingDays || [],
       }));
 
-      console.log("Lecturers data structure:", data);
       const sampleLecturer =
         Object.keys(data).length > 0 ? data[Object.keys(data)[0]] : null;
-      console.log("Sample lecturer:", sampleLecturer);
 
       setLecturers(formattedData);
       setIsLoadingLecturers(false);
@@ -425,7 +420,9 @@ export default function HomePage() {
             ) : (
               <div className="space-y-3">
                 {todayPresence.map((presence) => {
-                  // Find the lecturer to check if they have schedule today
+                  console.log("check-in", presence.checkInTime);
+                  console.log("time", presence.time);
+
                   const lecturer = lecturers.find(
                     (l) => l.id === presence.lecturerId
                   );
@@ -507,12 +504,11 @@ export default function HomePage() {
                             </div>
                             <div className="text-xs text-blue-600">
                               Out:{" "}
-                              {presence.checkOutTime ||
-                                formatTime(presence.time)}
+                              {presence.checkOutTime || presence.checkInTime}
                             </div>
                           </div>
                         ) : (
-                          formatTime(presence.time)
+                          presence.checkInTime 
                         )}
                       </div>
                     </div>
@@ -555,11 +551,18 @@ function formatDateISO(date: Date): string {
 
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Jakarta", // pastikan gunakan zona WIB
-  }) + " WIB";
+
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  // 🔁 Koreksi waktu (misalnya kurangi 12 jam)
+  if (hours >= 12) {
+    hours -= 12;
+  }
+
+  // Tambahan agar tetap dua digit
+  const correctedHour = String(hours).padStart(2, "0");
+
+  return `${correctedHour}:${minutes} WIB`;
 }
 
